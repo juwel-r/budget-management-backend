@@ -19,7 +19,7 @@ export const checkUserStatus = async (
   // });
 
   if (email) {
-    isUserExist = await User.findOne({ email });
+    isUserExist = await User.findOne({ email }).select("+password");;
     if (!isUserExist) {
       throw new AppError(
         statusCode.NOT_FOUND,
@@ -27,7 +27,7 @@ export const checkUserStatus = async (
       );
     }
   } else if (phone) {
-    isUserExist = await User.findOne({ phone });
+    isUserExist = await User.findOne({ phone }).select("+password");;
     if (!isUserExist) {
       throw new AppError(
         statusCode.NOT_FOUND,

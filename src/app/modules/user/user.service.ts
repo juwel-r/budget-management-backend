@@ -2,6 +2,8 @@ import { User } from "./user.model";
 import AppError from "../../errorHelpers/AppError";
 import { statusCode } from "../../utils/statusCode";
 import type { IUser } from "./user.interface";
+import bcrypt from "bcryptjs";
+import { envVar } from "../../config/env.config";
 
 const registerUser = async (payload: Partial<IUser>) => {
   const existingUser = await User.findOne({
@@ -11,6 +13,9 @@ const registerUser = async (payload: Partial<IUser>) => {
   if (existingUser) {
     throw new AppError(statusCode.BAD_REQUEST, "User already exists.");
   }
+
+  const hashPass = await bcrypt.hash(payload.password as string, Number(envVar.BCRYPT_SALT_ROUND));
+  payload.password = hashPass;
 
   const user = await User.create(payload);
   return user;
@@ -38,11 +43,7 @@ const getSingleUser = async (id: string) => {
 };
 
 const updateUser = async (id: string, payload: Partial<IUser>) => {
-  const user = await User.findOneAndUpdate(
-    { _id: id, isDeleted: false },
-    payload,
-    { new: true, runValidators: true },
-  ).select("-password");
+  const user = await User.findOneAndUpdate({ _id: id, isDeleted: false }, payload, { new: true, runValidators: true }).select("-password");
 
   if (!user) {
     throw new AppError(statusCode.NOT_FOUND, "User not found.");
@@ -52,11 +53,7 @@ const updateUser = async (id: string, payload: Partial<IUser>) => {
 };
 
 const deleteUser = async (id: string) => {
-  const user = await User.findOneAndUpdate(
-    { _id: id, isDeleted: false },
-    { isDeleted: true },
-    { new: true },
-  ).select("-password");
+  const user = await User.findOneAndUpdate({ _id: id, isDeleted: false }, { isDeleted: true }, { new: true }).select("-password");
 
   if (!user) {
     throw new AppError(statusCode.NOT_FOUND, "User not found.");
