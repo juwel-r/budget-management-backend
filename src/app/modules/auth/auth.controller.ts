@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import type { NextFunction, Request, Response } from "express";;
+import type { NextFunction, Request, Response } from "express";
 import { AuthServices } from "./auth.service";
 import AppError from "../../errorHelpers/AppError";
 import type { JwtPayload } from "jsonwebtoken";
@@ -7,6 +7,18 @@ import { catchAsync } from "../../utils/catchAsync";
 import { setCookieAuth } from "../../utils/setCookies";
 import { sendRes } from "../../utils/sendResponse";
 import { statusCode } from "../../utils/statusCode";
+
+const emailVerification = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const token = req.query.token;
+  const result = await AuthServices.emailVerification(token as string);
+
+  sendRes(res, {
+    statusCode: statusCode.OK,
+    success: true,
+    message: "Email verified Successfully.",
+    data: result,
+  });
+});
 
 const credentialLogin = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const result = await AuthServices.credentialLogin(req.body);
@@ -87,19 +99,17 @@ const setPassword = catchAsync(async (req: Request, res: Response, next: NextFun
   });
 });
 
-const forgotPassword = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
-    const { email } = req.body;
-    await AuthServices.forgotPassword(email);
+const forgotPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+  const { email } = req.body;
+  await AuthServices.forgotPassword(email);
 
-    sendRes(res, {
-      success: true,
-      statusCode: statusCode.OK,
-      message: "Password recovery email sent successfully.",
-      data: null,
-    });
-  }
-);
+  sendRes(res, {
+    success: true,
+    statusCode: statusCode.OK,
+    message: "Password recovery email sent successfully.",
+    data: null,
+  });
+});
 
 const resetPassword = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
   const decodedToken = req.user;
@@ -116,11 +126,12 @@ const resetPassword = catchAsync(async (req: Request, res: Response, next: NextF
 });
 
 export const AuthController = {
+  emailVerification,
   credentialLogin,
   newAccessToken,
   logout,
   changePassword,
   setPassword,
   forgotPassword,
-  resetPassword
+  resetPassword,
 };

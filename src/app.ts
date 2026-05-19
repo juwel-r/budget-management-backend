@@ -18,7 +18,7 @@ app.use(cookieParser());
 app.use("/api/v1", router);
 
 app.get("/", (req: Request, res: Response) => {
-  res.send("Budget Management server running 🚀");
+  res.send("Budget Manager server running 🚀");
 });
 
 app.use(globalErrorHandler);

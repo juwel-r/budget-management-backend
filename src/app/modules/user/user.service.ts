@@ -4,22 +4,71 @@ import { statusCode } from "../../utils/statusCode";
 import type { IUser } from "./user.interface";
 import bcrypt from "bcryptjs";
 import { envVar } from "../../config/env.config";
+import { generateToken } from "../../utils/jwt";
+import { sendEMail } from "../../utils/sendEMail";
+
+import mongoose from "mongoose";
 
 const registerUser = async (payload: Partial<IUser>) => {
-  const existingUser = await User.findOne({
-    $or: [{ email: payload.email }, { phone: payload.phone }],
-  });
+  const session = await mongoose.startSession();
 
-  if (existingUser) {
-    throw new AppError(statusCode.BAD_REQUEST, "User already exists.");
+  try {
+    session.startTransaction();
+
+    const existingUser = await User.findOne(
+      {
+        $or: [{ email: payload.email }, { phone: payload.phone }],
+      },
+      null,
+      { session },
+    );
+
+    if (existingUser) {
+      throw new AppError(statusCode.BAD_REQUEST, "User already exists.");
+    }
+
+    const hashPass = await bcrypt.hash(
+      payload.password as string,
+      Number(envVar.BCRYPT_SALT_ROUND),
+    );
+
+    payload.password = hashPass;
+
+    const createdUsers = await User.create([payload], { session });
+
+    const createUser = createdUsers[0];
+
+    const verificationToken = generateToken(
+      { uid: createUser!._id.toString() },
+      envVar.JWT_ACCESS_SECRET,
+      "1h",
+    );
+
+    const verificationLink = `${envVar.FRONTEND_URL}/verify-email?token=${verificationToken}`;
+
+    await sendEMail({
+      to: createUser!.email as string,
+      subject: "Welcome to Budget Manager — Verify Your Email",
+      templateName: "emailVerification",
+      templateData: {
+        appName: "Budget Manager",
+        name: createUser!.fullName,
+        verificationLink,
+        expiryTime: "1 hour",
+      },
+    });
+
+    await session.commitTransaction();
+
+    const { password, ...user } = createUser!.toObject();
+
+    return user;
+  } catch (error) {
+    await session.abortTransaction();
+    throw error;
+  } finally {
+    session.endSession();
   }
-
-  const hashPass = await bcrypt.hash(payload.password as string, Number(envVar.BCRYPT_SALT_ROUND));
-  payload.password = hashPass;
-
-  const createUser = await User.create(payload);
-   const { password, ...user } = createUser!.toObject();
-  return user;
 };
 
 const getAllUser = async () => {
@@ -44,7 +93,10 @@ const getSingleUser = async (id: string) => {
 };
 
 const updateUser = async (id: string, payload: Partial<IUser>) => {
-  const user = await User.findOneAndUpdate({ _id: id, isDeleted: false }, payload, { new: true, runValidators: true }).select("-password");
+  const user = await User.findOneAndUpdate({ _id: id, isDeleted: false }, payload, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
 
   if (!user) {
     throw new AppError(statusCode.NOT_FOUND, "User not found.");
@@ -54,7 +106,9 @@ const updateUser = async (id: string, payload: Partial<IUser>) => {
 };
 
 const deleteUser = async (id: string) => {
-  const user = await User.findOneAndUpdate({ _id: id, isDeleted: false }, { isDeleted: true }, { new: true }).select("-password");
+  const user = await User.findOneAndUpdate({ _id: id, isDeleted: false }, { isDeleted: true }, { new: true }).select(
+    "-password",
+  );
 
   if (!user) {
     throw new AppError(statusCode.NOT_FOUND, "User not found.");

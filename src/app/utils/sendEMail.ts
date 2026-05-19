@@ -28,7 +28,7 @@ export const sendEMail = async ({ to, subject, attachments, templateName, templa
     const templatePath = await path.join(__dirname, `templates/${templateName}.ejs`);
     const html = await ejs.renderFile(templatePath, templateData);
     const info = await transporter.sendMail({
-      from: `"Gizmo Craft" <no-reply@gizmocraft.com>`,
+      from: `"Budget Manager" <no-reply@gizmocraft.com>`,
       to: to,
       subject: subject,
       html: html,
@@ -38,7 +38,6 @@ export const sendEMail = async ({ to, subject, attachments, templateName, templa
         contentType: attachment.contentType,
       })),
     });
-    console.log(`Email set to ${to}: ${info.messageId}`);
   } catch (error: any) {
     console.log(error.message);
     throw new AppError(400, "Email Send Error");

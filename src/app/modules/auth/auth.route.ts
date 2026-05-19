@@ -7,6 +7,7 @@ import { updateUserZod } from "../user/user.validation";
 
 const router = Router();
 
+router.post("/email-verify", AuthController.emailVerification);
 router.post("/login", AuthController.credentialLogin);
 router.post("/logout", AuthController.logout);
 router.post("/new-access-token", checkAuth(...Object.values(ERole)), AuthController.newAccessToken);

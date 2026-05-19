@@ -3,6 +3,9 @@ import { catchAsync } from "../../utils/catchAsync";
 import { statusCode } from "../../utils/statusCode";
 import { UserServices } from "./user.service";
 import { sendRes } from "../../utils/sendResponse";
+import { generateToken } from "../../utils/jwt";
+import { envVar } from "../../config/env.config";
+import { sendEMail } from "../../utils/sendEMail";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
   const payload = req.body;

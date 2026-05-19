@@ -2,12 +2,13 @@
 import statusCode from "http-status";
 import { User } from "../modules/user/user.model";
 import AppError from "../errorHelpers/AppError";
+import type { IUser } from "../modules/user/user.interface";
 
 export const checkUserStatus = async (
   email?: string,
   phone?: string,
   id?: string,
-) => {
+):IUser<Promise> => {
   let isUserExist;
 
   // const user = await User.findOne({

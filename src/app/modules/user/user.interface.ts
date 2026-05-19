@@ -1,4 +1,4 @@
-import type { Types } from "mongoose";
+import type { Types, Document } from "mongoose";
 
 export enum ERole {
   admin = "admin",
@@ -24,3 +24,5 @@ export interface IUser {
   isBlocked: boolean;
   isDeleted: boolean;
 }
+
+// export interface IUserDocument extends IUser, Document {}

@@ -11,6 +11,13 @@ import { createUserToken } from "../../utils/userTokens";
 import { generateToken, verifyToken } from "../../utils/jwt";
 import { sendEMail } from "../../utils/sendEMail";
 
+const emailVerification = async (token: string) => {
+  const decodedToken = verifyToken(token, envVar.JWT_ACCESS_SECRET) as any;
+
+  const user = await User.findByIdAndUpdate(decodedToken.uid, { isEmailVerified: true });
+  return;
+};
+
 const credentialLogin = async (payload: Partial<IUser>) => {
   const { email, phone, password } = payload;
 
@@ -23,6 +30,8 @@ const credentialLogin = async (payload: Partial<IUser>) => {
     isExistUser = await checkUserStatus(email);
   } else if (phone) {
     isExistUser = await checkUserStatus("", phone);
+  } else {
+    throw new AppError(400, "");
   }
 
   const u = await User.findOne({ email }).select("+password");
@@ -34,12 +43,12 @@ const credentialLogin = async (payload: Partial<IUser>) => {
   const userTokens = createUserToken(isExistUser!);
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  // const { password: pass, ...user } = isExistUser!.toObject();
+  // const { password: pass, ...user } = isExistUser.toObject();
 
   return {
     accessToken: userTokens.accessToken,
     refreshToken: userTokens.refreshToken,
-    user:isExistUser,
+    user: isExistUser,
   };
 };
 
@@ -113,7 +122,7 @@ const forgotPassword = async (email: string) => {
 
   sendEMail({
     to: isUserExist!.email as string,
-    subject: "Gizmo Craft - Reset password",
+    subject: "Reset password - Budget Manager",
     templateName: "forgotPassword",
     templateData: {
       name: isUserExist!.fullName,
@@ -131,6 +140,7 @@ const resetPassword = async (id: string, password: string) => {
 };
 
 export const AuthServices = {
+  emailVerification,
   credentialLogin,
   newAccessToken,
   changePassword,
