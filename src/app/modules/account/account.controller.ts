@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { catchAsync } from "../../utils/catchAsync"; 
+import { catchAsync } from "../../utils/catchAsync";
 import { statusCode } from "../../utils/statusCode";
 import { AccountServices } from "./account.service";
 import { sendRes } from "../../utils/sendResponse";
@@ -45,11 +45,7 @@ const getSingleAccount = catchAsync(async (req: Request, res: Response) => {
 const updateAccount = catchAsync(async (req: Request, res: Response) => {
   const { id } = req.params;
 
-  const result = await AccountServices.updateAccount(
-    id as string,
-    req.user!.uid,
-    req.body,
-  );
+  const result = await AccountServices.updateAccount(id as string, req.user!.uid, req.body);
 
   sendRes(res, {
     statusCode: statusCode.OK,

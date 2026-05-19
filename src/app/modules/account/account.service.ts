@@ -4,6 +4,18 @@ import { Account } from "./account.model";
 import type { IAccount } from "./account.interface";
 
 const createAccount = async (payload: IAccount) => {
+  if (payload.isDefault) {
+    const isExistDefaultCategory = await Account.findOne({ isDefault: true });
+
+    if (isExistDefaultCategory && !payload.forceDefault) {
+      throw new AppError(statusCode.CONFLICT, "Already have a default account.");
+    }
+
+    if (payload.forceDefault) {
+      await Account.findOneAndUpdate({ isDefault: true }, { isDefault: false });
+    }
+  }
+
   const account = await Account.create(payload);
   return account;
 };
@@ -31,11 +43,19 @@ const getSingleAccount = async (id: string, userId: string) => {
   return account;
 };
 
-const updateAccount = async (
-  id: string,
-  userId: string,
-  payload: Partial<IAccount>,
-) => {
+const updateAccount = async (id: string, userId: string, payload: Partial<IAccount>) => {
+  if (payload.isDefault) {
+    const isExistDefaultCategory = await Account.findOne({ isDefault: true });
+
+    if (isExistDefaultCategory && !payload.forceDefault) {
+      throw new AppError(statusCode.CONFLICT, "Already have a default account.");
+    }
+
+    if (payload.forceDefault) {
+      await Account.findOneAndUpdate({ isDefault: true }, { isDefault: false });
+    }
+  }
+
   const account = await Account.findOneAndUpdate(
     {
       _id: id,

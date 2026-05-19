@@ -18,4 +18,5 @@ export interface IAccount {
   currentBalance: number;
   isArchived: boolean;
   isDefault: boolean; //Use for expense
+  forceDefault?: boolean;
 }
