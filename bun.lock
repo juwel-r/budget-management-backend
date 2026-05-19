@@ -3,7 +3,7 @@
   "configVersion": 0,
   "workspaces": {
     "": {
-      "name": "budget-management",
+      "name": "finance-manager",
       "dependencies": {
         "@types/jsonwebtoken": "^9.0.10",
         "bcryptjs": "^3.0.3",

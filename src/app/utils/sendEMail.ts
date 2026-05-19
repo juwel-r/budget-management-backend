@@ -28,7 +28,7 @@ export const sendEMail = async ({ to, subject, attachments, templateName, templa
     const templatePath = await path.join(__dirname, `templates/${templateName}.ejs`);
     const html = await ejs.renderFile(templatePath, templateData);
     const info = await transporter.sendMail({
-      from: `"Budget Manager" <no-reply@gizmocraft.com>`,
+      from: `"Finance Manager" <no-reply@gizmocraft.com>`,
       to: to,
       subject: subject,
       html: html,

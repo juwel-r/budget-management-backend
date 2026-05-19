@@ -41,20 +41,20 @@ const registerUser = async (payload: Partial<IUser>) => {
     const verificationToken = generateToken(
       { uid: createUser!._id.toString() },
       envVar.JWT_ACCESS_SECRET,
-      "1h",
+      "1d",
     );
 
     const verificationLink = `${envVar.FRONTEND_URL}/verify-email?token=${verificationToken}`;
 
     await sendEMail({
       to: createUser!.email as string,
-      subject: "Welcome to Budget Manager — Verify Your Email",
+      subject: "Welcome to Finance Manager — Verify Your Email",
       templateName: "emailVerification",
       templateData: {
-        appName: "Budget Manager",
+        appName: "Finance Manager",
         name: createUser!.fullName,
         verificationLink,
-        expiryTime: "1 hour",
+        expiryTime: "24 hour",
       },
     });
 

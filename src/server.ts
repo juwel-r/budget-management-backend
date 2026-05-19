@@ -11,7 +11,7 @@ const main = async () => {
     mongoose.connect(envVar.DB_URL as string);
     console.log("DB Connected");
     server = app.listen(envVar.PORT, () => {
-      console.log(`Budget Manager is live on port: ${envVar.PORT}...`);
+      console.log(`Finance Manager is live on port: ${envVar.PORT}...`);
     });
   } catch (error) {
     console.log(error);

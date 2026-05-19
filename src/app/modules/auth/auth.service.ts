@@ -14,7 +14,9 @@ import { sendEMail } from "../../utils/sendEMail";
 const emailVerification = async (token: string) => {
   const decodedToken = verifyToken(token, envVar.JWT_ACCESS_SECRET) as any;
 
-  const user = await User.findByIdAndUpdate(decodedToken.uid, { isEmailVerified: true });
+  const user = await User.findByIdAndUpdate(decodedToken.uid, {
+    isEmailVerified: true,
+  });
   return;
 };
 
@@ -48,7 +50,7 @@ const credentialLogin = async (payload: Partial<IUser>) => {
   return {
     accessToken: userTokens.accessToken,
     refreshToken: userTokens.refreshToken,
-    user:isExistUser
+    user: isExistUser,
   };
 };
 
@@ -67,7 +69,9 @@ const newAccessToken = async (refreshToken: string) => {
 };
 
 const changePassword = async (newPassword: string, oldPassword: string, decodedToken: JwtPayload) => {
-  const user = await checkUserStatus("", "", decodedToken.uid);
+  await checkUserStatus("", "", decodedToken.uid);
+
+  const user = await User.findById(decodedToken.uid).select("+password");
 
   const isOldPassMatched = await bcryptjs.compare(oldPassword, user!.password!);
   if (!isOldPassMatched) {
@@ -122,7 +126,7 @@ const forgotPassword = async (email: string) => {
 
   sendEMail({
     to: isUserExist!.email as string,
-    subject: "Reset password - Budget Manager",
+    subject: "Reset password - Finance Manager",
     templateName: "forgotPassword",
     templateData: {
       name: isUserExist!.fullName,

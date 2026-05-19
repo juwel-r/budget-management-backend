@@ -17,10 +17,7 @@ export const registerUserZod = z.object({
     })
     .optional(),
 
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 character." })
-    .optional(),
+  password: z.string().min(6, { message: "Password must be at least 6 character." }).optional(),
 });
 
 export const updateUserZod = z.object({
@@ -40,10 +37,8 @@ export const updateUserZod = z.object({
     })
     .optional(),
 
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 character." })
-    .optional(),
+  oldPassword: z.string().min(6, { message: "Password must be at least 6 character." }).optional(),
+  newPassword: z.string().min(6, { message: "Password must be at least 6 character." }).optional(),
 
   role: z.enum([ERole.admin, ERole.user]).optional(),
   avatar: z.string().optional(),
